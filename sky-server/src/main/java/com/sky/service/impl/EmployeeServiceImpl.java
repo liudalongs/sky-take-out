@@ -1,17 +1,28 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
+import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
+import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -39,7 +50,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         //密码比对
-        // TODO 后期需要进行md5加密，然后再进行比对
+        // 对前端传过来的密码进行MD5加密 spring提供的MD5加密
+        password=DigestUtils.md5DigestAsHex(password.getBytes());
+
         if (!password.equals(employee.getPassword())) {
             //密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
@@ -52,6 +65,55 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //3、返回实体对象
         return employee;
+    }
+
+    /**
+     * 新增员工
+     * @param employeeDTO
+     */
+    public void save(EmployeeDTO employeeDTO) {
+
+        //这里又把EmployeeDTO类型转为Employee类型，然后在插入数据库中
+        Employee employee =new Employee();
+
+        //对象属性拷贝,把EmployeeDTO相同属性拷贝到Employee属性中去
+        BeanUtils.copyProperties(employeeDTO,employee);
+
+        //设置账号状态，0禁用，1启用 默认启用
+        employee.setStatus(StatusConstant.ENABLE);
+
+        //设置密码属性，采用MD5加密,默认密码123456字符串
+        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
+
+        //创建时间和修改时间
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setUpdateTime(LocalDateTime.now());
+
+        //创建人和修改人id
+        // 获取当前线程局部变量
+        employee.setCreateUser(BaseContext.getCurrentId());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        employeeMapper.save(employee);
+    }
+
+    /**
+     * 员工分页查询
+     * @param employeePageQueryDTO
+     * @return
+     */
+    public PageResult page(EmployeePageQueryDTO employeePageQueryDTO) {
+        int page=employeePageQueryDTO.getPage();//页码
+        int pageSize=employeePageQueryDTO.getPageSize();//每页记录数
+        //1. 设置分页参数
+        PageHelper.startPage(page,pageSize);
+        //2. 执行查询
+        List<Employee> employeeList = employeeMapper.page(employeePageQueryDTO);
+        Page<Employee> p = (Page<Employee>) employeeList;
+
+        //3. 封装PageResult对象
+        PageResult pageResult = new PageResult(p.getTotal(), p.getResult());
+        return pageResult;
+
     }
 
 }
