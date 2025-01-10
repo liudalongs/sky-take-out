@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@Builder  //@Builder注解Lombok会自动生成一个内部静态类PersonBuilder，我们可以使用生成的建造者模式来创建Person
 @NoArgsConstructor
 @AllArgsConstructor
 public class Employee implements Serializable {

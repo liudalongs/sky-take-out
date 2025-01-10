@@ -31,4 +31,15 @@ public interface EmployeeMapper {
      * 分页查询员工
      */
     public List<Employee> page(EmployeePageQueryDTO employeePageQueryDTO);
+
+    /**
+     * 根据主键修改员工信息（1、启用、禁用员工账号）
+     */
+    void update(Employee employee);
+
+    /**
+     * 根据id查询员工
+     */
+    @Select("select * from employee where id=#{id}")
+    Employee getById(Long id);
 }

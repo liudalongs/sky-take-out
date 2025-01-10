@@ -4,6 +4,41 @@
 <mapper namespace="com.sky.mapper.EmployeeMapper">
 
 
+    <update id="update"> /*根据主键修改员工信息*/
+        update employee
+        <set>    <!--<set>注解可以除掉，的影响-->
+            <if test="username != null and username != ''">
+                username = #{username},
+            </if>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="phone!= null and phone!= ''">
+                 phone=#{phone},
+            </if>
+            <if test="sex!= null and sex!= ''">
+                sex=#{sex},
+            </if>
+            <if test="idNumber!= null and idNumber!= ''">
+                id_number = #{idNumber},
+            </if>
+            <if test="status!= null">
+                status= #{status},
+            </if>
+            <if test="updateUser!= null">
+                update_user = #{updateUser},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+
     <select id="page" resultType="com.sky.entity.Employee">
         select *
         from employee
