@@ -10,4 +10,23 @@
           values
               (#{name},#{categoryId},#{price},#{image},#{description},#{createTime},#{updateTime},#{createUser},#{updateUser},#{status})
     </insert>
+
+    <select id="pageQuery" resultType="com.sky.vo.DishVO">
+        select d.*,c.name as categoryName  /*为什么c.name as categoryName 起别名，因为数据库查出来字段名为 name,而DishVO属性名为categoryName,起别名才能赋值*/
+        from dish d left outer join category c
+            on d.category_id=c.id
+        <where>  <!--有了<where>这个注解就能取消掉and或者or或者where的影响-->
+            <if test="name !=null">
+                d.name like concat('%',#{name},'%')
+            </if>
+            <if test="categoryId !=null">
+                and d.category_id=#{categoryId}
+            </if>
+            <if test="status !=null">
+            and d.status=#{status}
+            </if>
+        </where>
+
+       order by d.create_time desc
+    </select>
 </mapper>
