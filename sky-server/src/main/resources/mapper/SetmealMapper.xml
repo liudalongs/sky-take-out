@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.SetmealMapper">
+
+    <!--useGeneratedKeys="true" keyProperty="id"意思是把setmeal插入数据库后，
+    需要使用生成的主键值，并把主键值赋值给这个setmeal对象的id属性-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into setmeal(category_id, name, price, description, image, create_time, update_time, create_user, update_user,status)
+          values
+        (#{categoryId},#{name},#{price},#{description},#{image},#{createTime},#{updateTime},#{createUser},#{updateUser},#{status})
+    </insert>
+
+
+
+    <select id="page" resultType="com.sky.vo.SetmealVO">
+        select
+        s.*,c.name categoryName
+        from
+        setmeal s
+        left join
+        category c
+        on
+        s.category_id = c.id
+        <where>
+            <if test="name != null">
+                and s.name like concat('%',#{name},'%')
+            </if>
+            <if test="status != null">
+                and s.status = #{status}
+            </if>
+            <if test="categoryId != null">
+                and s.category_id = #{categoryId}
+            </if>
+        </where>
+        order by s.create_time desc
+    </select>
+
+    <update id="update">
+        update setmeal    /*动态更新员工数据*/
+        <set>    <!--<set>注解可以除掉，的影响-->
+            <if test="categoryId != null ">
+                category_id = #{categoryId},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="description != null ">
+                description = #{description},
+            </if>
+            <if test="image != null">
+                image = #{image},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="createUser != null">
+                create_user = #{createUser},
+            </if>
+            <if test="updateUser != null">
+                update_user = #{updateUser},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>
